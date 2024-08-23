@@ -52,12 +52,12 @@ impl AppListener {
     /// Create the listener and reserve the port.
     pub fn new() -> Result<Self, CommsError> {
         let listener =
-            TcpListener::bind("127.0.0.1:0").map_err(|e| CommsError::ErrorCreatingListener(e))?;
+            TcpListener::bind("127.0.0.1:0").map_err(CommsError::ErrorCreatingListener)?;
 
         // So we can implement a timeout later.
         listener
             .set_nonblocking(true)
-            .map_err(|e| CommsError::ErrorCreatingListener(e))?;
+            .map_err(CommsError::ErrorCreatingListener)?;
 
         Ok(Self { listener })
     }
@@ -111,10 +111,10 @@ impl AppConnection {
     pub fn new(stream: TcpStream) -> Result<Self, CommsError> {
         stream
             .set_nonblocking(true)
-            .map_err(|e| CommsError::ErrorCreatingConnection(e))?;
+            .map_err(CommsError::ErrorCreatingConnection)?;
         stream
             .set_nodelay(true)
-            .map_err(|e| CommsError::ErrorCreatingConnection(e))?;
+            .map_err(CommsError::ErrorCreatingConnection)?;
         Ok(Self {
             stream,
             buffer: [0u8; 9000],
@@ -126,7 +126,7 @@ impl AppConnection {
         let result = self.stream.write(&self.buffer[0..size]);
         //match return type.
         result
-            .map_err(|e| CommsError::WriteLvMessageError(e))
+            .map_err(CommsError::WriteLvMessageError)
             .map(|_| ())
     }
 
@@ -174,10 +174,10 @@ impl MessageFromLV {
         );
 
         let id =
-            std::str::from_utf8(&buffer[4..8]).map_err(|e| CommsError::MessageIdNotValidUTF8(e))?;
+            std::str::from_utf8(&buffer[4..8]).map_err(CommsError::MessageIdNotValidUTF8)?;
         let data_end: usize = 8 + (length as usize) - 4; // 8 = offset, 4 = already used for id
         let contents = std::str::from_utf8(&buffer[8..data_end])
-            .map_err(|e| CommsError::MessageContentsNotValidUTF8(e))?;
+            .map_err(CommsError::MessageContentsNotValidUTF8)?;
 
         match id {
             "EXIT" => {
