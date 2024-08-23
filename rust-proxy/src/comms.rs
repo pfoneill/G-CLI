@@ -126,7 +126,7 @@ impl AppConnection {
         let result = self.stream.write(&self.buffer[0..size]);
         //match return type.
         result
-            .map_err(CommsError::WriteLvMessageError)
+            .map_err(|e| CommsError::WriteLvMessageError(e))
             .map(|_| ())
     }
 
@@ -174,7 +174,7 @@ impl MessageFromLV {
         );
 
         let id =
-            std::str::from_utf8(&buffer[4..8]).map_err(CommsError::MessageIdNotValidUTF8)?;
+            std::str::from_utf8(&buffer[4..8]).map_err(|e| CommsError::MessageIdNotValidUTF8(e))?;
         let data_end: usize = 8 + (length as usize) - 4; // 8 = offset, 4 = already used for id
         let contents = std::str::from_utf8(&buffer[8..data_end])
             .map_err(CommsError::MessageContentsNotValidUTF8)?;

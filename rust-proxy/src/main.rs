@@ -141,8 +141,7 @@ fn launch_process(
         ext.to_str().expect("Extension isn't valid UTF-8")
     });
 
-    
-    match extension_as_str {
+    let process = match extension_as_str {
         Some("vi") => {
             let active_install = find_install(&config.lv_version_string, config.bitness)?;
 
@@ -174,7 +173,8 @@ fn launch_process(
             .wrap_err("Failed to launch LabVIEW")
         }
         Some(extension) => Err(eyre!("Unknown extension {:?}", extension)),
-    }
+    };
+    process
 }
 
 /// Uses the version string to select a valid LabVIEW installation.
